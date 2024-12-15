@@ -1,3 +1,6 @@
+## [1.1.3]
+* Remove pubspec.lock from package
+
 ## [1.1.2]
 * Pulling universal_ffi into a separate repo from wasm_ffi
 
