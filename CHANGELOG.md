@@ -1,3 +1,6 @@
+## [1.1.2]
+* Pulling universal_ffi into a separate repo from wasm_ffi
+
 ## [1.1.1]
 * Adding topics for pub.dev
 
