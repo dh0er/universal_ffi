@@ -1,0 +1,53 @@
+name: Publish Dart Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'CHANGELOG.md'
+
+jobs:
+  analyze-and-publish:
+    name: Analyze and Publish Dart Packages
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package:
+          - universal_ffi
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          channel: stable
+
+      - name: Check if relevant CHANGELOG is updated
+        id: changes
+        run: |
+          if [[ ! $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^${{ matrix.package }}/CHANGELOG.md$") ]]; then
+            echo "skip=true" >> $GITHUB_ENV
+          fi
+
+      - name: Analyze ${{ matrix.package }}
+        if: env.skip != 'true'
+        run: |
+          dart pub get
+          dart analyze
+          dart test
+
+      - name: Publish ${{ matrix.package }} (if valid)
+        if: env.skip != 'true'
+        env:
+          PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
+        run: |
+          # Validate the package
+          dart pub publish --dry-run
+
+          # Publish the package if validation succeeds
+          echo "Publishing ${{ matrix.package }} to pub.dev..."
+          # dart pub publish --force
